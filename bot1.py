@@ -11,7 +11,7 @@ import json
 class Solution:
     def tradeBot(self, testMode):
         TESTNET = testMode
-        max_minutes = 10
+        max_minutes = 3
         holdings = 0
         simple = {}
         if TESTNET:
@@ -86,40 +86,70 @@ class Solution:
         def sell_all():
             pass
 
+        def update_portfolio(date,value,filename='portfolio_history.json'):
+            with open('portfolio_history.json') as json_file:
+                data = json.load(json_file)
+                temp = data["history"]
+                y = {"date": time.ctime(date), 'value': value}
+                temp.append(y)
+
+            with open('portfolio_history.json', "w") as f:
+                json.dump(data, f, indent=4)
 
         sell_all()
-
         while True:
             if holdings == 0:
                 # buy coin
+                print("--------------------")
+                print("[BUY]")
                 coin = pick_coin()
                 print(f"Buying {coin}")
                 simple, holdings = buy(coin)
                 print(f"Now holding {holdings}")
                 print(simple)
+                print("--------------------")
             else:
                 # check time, take profit, stop loss
-                time_passed = calendar.timegm(time.gmtime()) - simple['time']
+                print("--------------------")
+
+                time_passed = calendar.timegm(time.gmtime()) - simple['time']/1000
 
                 if time_passed >= 60 * max_minutes:
-                    print("maximum minute passed, selling coins")
+                    print("[TIME LIMIT PASSED]")
+                    print(time_passed)
+                    print(f"maximum minute {max_minutes} passed, selling coins")
                     simple, holdings = sell(coin)
+                    update_portfolio(calendar.timegm(time.gmtime()),get_account_value())
+                    print("--------------------")
+
                 else:
-                    print("time not passed yet")
+                    print("[TIME LIMIT NOT PASSED]")
+                    print(time_passed)
                     coinInfo = client.get_symbol_ticker(symbol=coin)
                     currentPrice = coinInfo['price']
                     boughtPrice = simple['avg']
                     percentage = ((float(currentPrice) - float(boughtPrice)) / float(boughtPrice)) * 100
                     print(f"percentage is {percentage}")
 
-                    if percentage >= 3.0 or percentage <= -3:
-                        print("profit/loss-selling coins")
+                    if percentage >= 2.0 or percentage <= -1.5:
+                        if percentage > 0:
+                            print(f"selling with profits: {percentage}")
+                        else:
+                            print(f"selling with loss: {percentage}")
+
                         simple, holdings = sell(coin)
+                        update_portfolio(calendar.timegm(time.gmtime()), get_account_value())
                     else:
-                        print("nothing happend yet")
+                        print("price didn't hit target")
                         pass
 
+                    print("--------------------")
+
+
             time.sleep(5)
+
+
+
 
 
 
