@@ -2,6 +2,8 @@ import os
 import time
 import calendar
 import threading
+from typing import Set
+
 from binance.client import Client
 from datetime import datetime, timedelta
 import time
@@ -14,6 +16,8 @@ class Solution:
         max_minutes = 3
         holdings = 0
         simple = {}
+        possible_set = {'MCOUSDT', 'TORNUSDT', 'GTCUSDT', 'BTGUSDT', 'USDTTRY', 'EGLDUSDT', 'MLNUSDT', 'EOSBEARUSDT', 'XRPBULLUSDT', 'QTUMUSDT', 'PEOPLEUSDT', 'RGTUSDT', 'DREPUSDT', 'BTTUSDT', 'BURGERUSDT', 'GALAUSDT', 'DOGEUSDT', 'CTXCUSDT', 'NUUSDT', 'AMPUSDT', 'STXUSDT', 'BATUSDT', 'DEGOUSDT', 'BZRXUSDT', 'RAYUSDT', 'NKNUSDT', 'DEXEUSDT', 'XZCUSDT', 'HIVEUSDT', 'ONGUSDT', 'AXSUSDT', 'KAVAUSDT', 'KEEPUSDT', 'WAXPUSDT', 'IMXUSDT', 'TOMOUSDT', 'KEYUSDT', 'HOTUSDT', 'LSKUSDT', 'BNBBEARUSDT', 'SOLUSDT', 'FARMUSDT', 'IDEXUSDT', 'CTSIUSDT', 'USDTBRL', 'SUNUSDT', 'AUDIOUSDT', 'COMPUSDT', 'TRUUSDT', 'ENJUSDT', 'SANTOSUSDT', 'BCHSVUSDT', 'ANTUSDT', 'BAKEUSDT', 'BTCUSDT', 'PONDUSDT', 'LINAUSDT', 'RLCUSDT', 'FUNUSDT', 'FORUSDT', 'MBOXUSDT', 'FETUSDT', 'ACMUSDT', 'SYSUSDT', 'USDPUSDT', 'BETAUSDT', 'XRPBEARUSDT', 'MKRUSDT', 'WINGUSDT', 'REEFUSDT', 'YFIIUSDT', 'STRAXUSDT', 'DATAUSDT', 'AVAUSDT', 'LUNAUSDT', 'AVAXUSDT', 'CLVUSDT', 'IOTAUSDT', 'DCRUSDT', 'CITYUSDT', 'INJUSDT', 'PSGUSDT', 'XMRUSDT', 'BEARUSDT', 'NULSUSDT', 'PERPUSDT', 'RIFUSDT', 'AGLDUSDT', 'BCHUSDT', 'PNTUSDT', 'ONEUSDT', 'FIROUSDT', 'BARUSDT', 'GHSTUSDT', 'HARDUSDT', 'FILUSDT', 'VIDTUSDT', 'LENDUSDT', 'AAVEUSDT', 'ALPACAUSDT', 'NANOUSDT', 'ARPAUSDT', 'CFXUSDT', 'NBSUSDT', 'HBARUSDT', 'CHRUSDT', 'VTHOUSDT', 'DIAUSDT', 'SKLUSDT', 'EOSUSDT', 'BADGERUSDT', 'FORTHUSDT', 'CELOUSDT', 'CHZUSDT', 'USDTBIDR', 'CVPUSDT', 'USDSUSDT', 'DAIUSDT', 'BTCSTUSDT', 'WANUSDT', 'OCEANUSDT', 'USDTBKRW', 'MDTUSDT', 'ENSUSDT', 'LRCUSDT', 'WRXUSDT', 'MINAUSDT', 'ZILUSDT', 'RUNEUSDT', 'GXSUSDT', 'LINKUSDT', 'ANKRUSDT', 'RSRUSDT', 'FTTUSDT', 'RNDRUSDT', 'BELUSDT', 'UMAUSDT', 'FIDAUSDT', 'RAMPUSDT', 'PYRUSDT', 'TVKUSDT', 'PAXUSDT', 'TROYUSDT', 'FIOUSDT', 'TRXUSDT', 'BALUSDT', 'XVGUSDT', '1INCHUSDT', 'POWRUSDT', 'THETAUSDT', 'USDTUAH', 'COTIUSDT', 'DGBUSDT', 'BTSUSDT', 'KMDUSDT', 'ETCUSDT', 'TRIBEUSDT', 'QIUSDT', 'ROSEUSDT', 'PUNDIXUSDT', 'OMGUSDT', 'ILVUSDT', 'STORMUSDT', 'HNTUSDT', 'GRTUSDT', 'USDTGYEN', 'AIONUSDT', 'JASMYUSDT', 'BANDUSDT', 'RADUSDT', 'PAXGUSDT', 'ERDUSDT', 'MANAUSDT', 'LTOUSDT', 'LTCUSDT', 'SPELLUSDT', 'XRPUSDT', 'NMRUSDT', 'STORJUSDT', 'ALGOUSDT', 'WAVESUSDT', 'ATAUSDT', 'CHESSUSDT', 'BCCUSDT', 'FRONTUSDT', 'RVNUSDT', 'OGNUSDT', 'BNTUSDT', 'KSMUSDT', 'FLMUSDT', 'ANYUSDT', 'POLYUSDT', 'DNTUSDT', 'ALCXUSDT', 'ONTUSDT', 'BEAMUSDT', 'USDTBVND', 'MITHUSDT', 'DOTUSDT', 'GNOUSDT', 'ORNUSDT', 'TFUELUSDT', 'ELFUSDT', 'SUSHIUSDT', 'CVXUSDT', 'LAZIOUSDT', 'REQUSDT', 'MASKUSDT', 'HIGHUSDT', 'JSTUSDT', 'JOEUSDT', 'ICXUSDT', 'USDTRUB', 'ADXUSDT', 'USDTNGN', 'BNXUSDT', 'MDXUSDT', 'PORTOUSDT', 'XLMUSDT', 'FLUXUSDT', 'XVSUSDT', 'ARDRUSDT', 'AUDUSDT', 'YFIUSDT', 'HCUSDT', 'TCTUSDT', 'MTLUSDT', 'USDCUSDT', 'USDTIDRT', 'CELRUSDT', 'IRISUSDT', 'VETUSDT', 'ADAUSDT', 'AKROUSDT', 'MBLUSDT', 'STPTUSDT', 'BUSDTRY', 'USDSBUSDT', 'OXTUSDT', 'SNXUSDT', 'KLAYUSDT', 'USDTZAR', 'ATOMUSDT', 'QUICKUSDT', 'SHIBUSDT', 'ETHUSDT', 'PERLUSDT', 'CAKEUSDT', 'TLMUSDT', 'VOXELUSDT', 'USDTDAI', 'DARUSDT', 'NEARUSDT', 'USTUSDT', 'AUTOUSDT', 'JUVUSDT', 'FXSUSDT', 'GTOUSDT', 'RENUSDT', 'XEMUSDT', 'BLZUSDT', 'COCOSUSDT', 'DOCKUSDT', 'ZENUSDT', 'ACHUSDT', 'ASRUSDT', 'FISUSDT', 'ICPUSDT', 'GLMRUSDT', 'WINUSDT', 'OOKIUSDT', 'CRVUSDT', 'BCHABCUSDT', 'KNCUSDT', 'MCUSDT', 'PHAUSDT', 'BONDUSDT', 'DYDXUSDT', 'MATICUSDT', 'WTCUSDT', 'DASHUSDT', 'NEOUSDT', 'DENTUSDT', 'UNIUSDT', 'FLOWUSDT', 'RAREUSDT', 'ZRXUSDT', 'DUSKUSDT', 'YGGUSDT', 'SFPUSDT', 'TKOUSDT', 'VENUSDT', 'IOTXUSDT', 'BNBUSDT', 'ERNUSDT', 'KP3RUSDT', 'ZECUSDT', 'COSUSDT', 'ALICEUSDT', 'ETHBULLUSDT', 'MIRUSDT', 'EOSBULLUSDT', 'REPUSDT', 'STRATUSDT', 'FTMUSDT', 'BULLUSDT', 'BNBBULLUSDT', 'ETHBEARUSDT', 'C98USDT', 'SCUSDT', 'SANDUSDT', 'UTKUSDT', 'LPTUSDT', 'POLSUSDT', 'CKBUSDT', 'TWTUSDT', 'VGXUSDT', 'VITEUSDT', 'OGUSDT', 'PLAUSDT', 'WNXMUSDT', 'UNFIUSDT', 'CTKUSDT', 'BICOUSDT', 'TRBUSDT', 'MOVRUSDT', 'SLPUSDT', 'AUCTIONUSDT', 'SXPUSDT', 'ALPHAUSDT', 'ARUSDT', 'NPXSUSDT', 'MFTUSDT', 'CVCUSDT', 'SRMUSDT', 'XECUSDT', 'XTZUSDT', 'ATMUSDT', 'DODOUSDT', 'IOSTUSDT', 'OMUSDT', 'EPSUSDT', 'DFUSDT', 'QNTUSDT', 'STMXUSDT', 'LITUSDT', 'BKRWUSDT'}
+
         if TESTNET:
             api_key = 'nYH4oc6HQl0P8gCUb7PpW8WHsGc5pmfYbcHyjr3y2oDd9y0690w0vKayZjoIRZw4'
             api_secret = 'r29O1aWoAn48V17SfeePE9jTK6YywXReSiqdqTY8BXWB470yRSiPm5wUMh9gc41v'
@@ -66,16 +70,18 @@ class Solution:
         def get_account_value():
             total_value = 0
             my_account = client.get_account()
-            exc_list = ['USDT', 'BUSD']
             for hashmap in my_account['balances']:
                 if float(hashmap['free']) > 0:
                     coinName = hashmap['asset']
-                    if coinName not in exc_list:
+                    tempName = coinName+"USDT"
+                    if tempName in possible_set:
                         coinName += 'USDT'
                         coinInfo = client.get_symbol_ticker(symbol=coinName)
                         total_value += float(coinInfo['price']) * float(hashmap['free'])
-                    else:
+                    elif coinName == "USDT":
                         total_value += float(hashmap['free'])
+                    else:
+                        pass
                 else:
                     pass
 
@@ -153,6 +159,7 @@ class Solution:
 
 
 
+#
+# bot = Solution()
+# bot.tradeBot(True)
 
-bot = Solution()
-bot.tradeBot(True)
