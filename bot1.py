@@ -3,19 +3,19 @@ import time
 import calendar
 import threading
 from typing import Set
-
 from binance.client import Client
 from datetime import datetime, timedelta
 import time
 from itertools import count
 import json
+import math
 
 class Solution:
-    def tradeBot(self, testMode):
+    def tradeBot(self, testMode, qnt, holdings, firstTime):
         TESTNET = testMode
-        max_minutes = 3
-        holdings = 0
-        simple = {}
+        max_minutes = 1
+        QUANTITY = qnt
+        portfolio = {}
         possible_set = {'MCOUSDT', 'TORNUSDT', 'GTCUSDT', 'BTGUSDT', 'USDTTRY', 'EGLDUSDT', 'MLNUSDT', 'EOSBEARUSDT', 'XRPBULLUSDT', 'QTUMUSDT', 'PEOPLEUSDT', 'RGTUSDT', 'DREPUSDT', 'BTTUSDT', 'BURGERUSDT', 'GALAUSDT', 'DOGEUSDT', 'CTXCUSDT', 'NUUSDT', 'AMPUSDT', 'STXUSDT', 'BATUSDT', 'DEGOUSDT', 'BZRXUSDT', 'RAYUSDT', 'NKNUSDT', 'DEXEUSDT', 'XZCUSDT', 'HIVEUSDT', 'ONGUSDT', 'AXSUSDT', 'KAVAUSDT', 'KEEPUSDT', 'WAXPUSDT', 'IMXUSDT', 'TOMOUSDT', 'KEYUSDT', 'HOTUSDT', 'LSKUSDT', 'BNBBEARUSDT', 'SOLUSDT', 'FARMUSDT', 'IDEXUSDT', 'CTSIUSDT', 'USDTBRL', 'SUNUSDT', 'AUDIOUSDT', 'COMPUSDT', 'TRUUSDT', 'ENJUSDT', 'SANTOSUSDT', 'BCHSVUSDT', 'ANTUSDT', 'BAKEUSDT', 'BTCUSDT', 'PONDUSDT', 'LINAUSDT', 'RLCUSDT', 'FUNUSDT', 'FORUSDT', 'MBOXUSDT', 'FETUSDT', 'ACMUSDT', 'SYSUSDT', 'USDPUSDT', 'BETAUSDT', 'XRPBEARUSDT', 'MKRUSDT', 'WINGUSDT', 'REEFUSDT', 'YFIIUSDT', 'STRAXUSDT', 'DATAUSDT', 'AVAUSDT', 'LUNAUSDT', 'AVAXUSDT', 'CLVUSDT', 'IOTAUSDT', 'DCRUSDT', 'CITYUSDT', 'INJUSDT', 'PSGUSDT', 'XMRUSDT', 'BEARUSDT', 'NULSUSDT', 'PERPUSDT', 'RIFUSDT', 'AGLDUSDT', 'BCHUSDT', 'PNTUSDT', 'ONEUSDT', 'FIROUSDT', 'BARUSDT', 'GHSTUSDT', 'HARDUSDT', 'FILUSDT', 'VIDTUSDT', 'LENDUSDT', 'AAVEUSDT', 'ALPACAUSDT', 'NANOUSDT', 'ARPAUSDT', 'CFXUSDT', 'NBSUSDT', 'HBARUSDT', 'CHRUSDT', 'VTHOUSDT', 'DIAUSDT', 'SKLUSDT', 'EOSUSDT', 'BADGERUSDT', 'FORTHUSDT', 'CELOUSDT', 'CHZUSDT', 'USDTBIDR', 'CVPUSDT', 'USDSUSDT', 'DAIUSDT', 'BTCSTUSDT', 'WANUSDT', 'OCEANUSDT', 'USDTBKRW', 'MDTUSDT', 'ENSUSDT', 'LRCUSDT', 'WRXUSDT', 'MINAUSDT', 'ZILUSDT', 'RUNEUSDT', 'GXSUSDT', 'LINKUSDT', 'ANKRUSDT', 'RSRUSDT', 'FTTUSDT', 'RNDRUSDT', 'BELUSDT', 'UMAUSDT', 'FIDAUSDT', 'RAMPUSDT', 'PYRUSDT', 'TVKUSDT', 'PAXUSDT', 'TROYUSDT', 'FIOUSDT', 'TRXUSDT', 'BALUSDT', 'XVGUSDT', '1INCHUSDT', 'POWRUSDT', 'THETAUSDT', 'USDTUAH', 'COTIUSDT', 'DGBUSDT', 'BTSUSDT', 'KMDUSDT', 'ETCUSDT', 'TRIBEUSDT', 'QIUSDT', 'ROSEUSDT', 'PUNDIXUSDT', 'OMGUSDT', 'ILVUSDT', 'STORMUSDT', 'HNTUSDT', 'GRTUSDT', 'USDTGYEN', 'AIONUSDT', 'JASMYUSDT', 'BANDUSDT', 'RADUSDT', 'PAXGUSDT', 'ERDUSDT', 'MANAUSDT', 'LTOUSDT', 'LTCUSDT', 'SPELLUSDT', 'XRPUSDT', 'NMRUSDT', 'STORJUSDT', 'ALGOUSDT', 'WAVESUSDT', 'ATAUSDT', 'CHESSUSDT', 'BCCUSDT', 'FRONTUSDT', 'RVNUSDT', 'OGNUSDT', 'BNTUSDT', 'KSMUSDT', 'FLMUSDT', 'ANYUSDT', 'POLYUSDT', 'DNTUSDT', 'ALCXUSDT', 'ONTUSDT', 'BEAMUSDT', 'USDTBVND', 'MITHUSDT', 'DOTUSDT', 'GNOUSDT', 'ORNUSDT', 'TFUELUSDT', 'ELFUSDT', 'SUSHIUSDT', 'CVXUSDT', 'LAZIOUSDT', 'REQUSDT', 'MASKUSDT', 'HIGHUSDT', 'JSTUSDT', 'JOEUSDT', 'ICXUSDT', 'USDTRUB', 'ADXUSDT', 'USDTNGN', 'BNXUSDT', 'MDXUSDT', 'PORTOUSDT', 'XLMUSDT', 'FLUXUSDT', 'XVSUSDT', 'ARDRUSDT', 'AUDUSDT', 'YFIUSDT', 'HCUSDT', 'TCTUSDT', 'MTLUSDT', 'USDCUSDT', 'USDTIDRT', 'CELRUSDT', 'IRISUSDT', 'VETUSDT', 'ADAUSDT', 'AKROUSDT', 'MBLUSDT', 'STPTUSDT', 'BUSDTRY', 'USDSBUSDT', 'OXTUSDT', 'SNXUSDT', 'KLAYUSDT', 'USDTZAR', 'ATOMUSDT', 'QUICKUSDT', 'SHIBUSDT', 'ETHUSDT', 'PERLUSDT', 'CAKEUSDT', 'TLMUSDT', 'VOXELUSDT', 'USDTDAI', 'DARUSDT', 'NEARUSDT', 'USTUSDT', 'AUTOUSDT', 'JUVUSDT', 'FXSUSDT', 'GTOUSDT', 'RENUSDT', 'XEMUSDT', 'BLZUSDT', 'COCOSUSDT', 'DOCKUSDT', 'ZENUSDT', 'ACHUSDT', 'ASRUSDT', 'FISUSDT', 'ICPUSDT', 'GLMRUSDT', 'WINUSDT', 'OOKIUSDT', 'CRVUSDT', 'BCHABCUSDT', 'KNCUSDT', 'MCUSDT', 'PHAUSDT', 'BONDUSDT', 'DYDXUSDT', 'MATICUSDT', 'WTCUSDT', 'DASHUSDT', 'NEOUSDT', 'DENTUSDT', 'UNIUSDT', 'FLOWUSDT', 'RAREUSDT', 'ZRXUSDT', 'DUSKUSDT', 'YGGUSDT', 'SFPUSDT', 'TKOUSDT', 'VENUSDT', 'IOTXUSDT', 'BNBUSDT', 'ERNUSDT', 'KP3RUSDT', 'ZECUSDT', 'COSUSDT', 'ALICEUSDT', 'ETHBULLUSDT', 'MIRUSDT', 'EOSBULLUSDT', 'REPUSDT', 'STRATUSDT', 'FTMUSDT', 'BULLUSDT', 'BNBBULLUSDT', 'ETHBEARUSDT', 'C98USDT', 'SCUSDT', 'SANDUSDT', 'UTKUSDT', 'LPTUSDT', 'POLSUSDT', 'CKBUSDT', 'TWTUSDT', 'VGXUSDT', 'VITEUSDT', 'OGUSDT', 'PLAUSDT', 'WNXMUSDT', 'UNFIUSDT', 'CTKUSDT', 'BICOUSDT', 'TRBUSDT', 'MOVRUSDT', 'SLPUSDT', 'AUCTIONUSDT', 'SXPUSDT', 'ALPHAUSDT', 'ARUSDT', 'NPXSUSDT', 'MFTUSDT', 'CVCUSDT', 'SRMUSDT', 'XECUSDT', 'XTZUSDT', 'ATMUSDT', 'DODOUSDT', 'IOSTUSDT', 'OMUSDT', 'EPSUSDT', 'DFUSDT', 'QNTUSDT', 'STMXUSDT', 'LITUSDT', 'BKRWUSDT'}
 
         if TESTNET:
@@ -29,43 +29,130 @@ class Solution:
             client = Client(api_key, api_secret)
 
         def pick_coin():
-            print("ETHUSDT picked...")
+            print("...ETHUSDT picked...")
             return 'ETHUSDT'
 
+        def get_possible():
+            FIATS = ['EURUSDT', 'GBPUSDT', 'JPYUSDT', 'USDUSDT', 'DOWN', 'UP']
+            prices = client.get_all_tickers()
+            possible_set = set()
+            for coin in prices:
+
+                # only Return USDT pairs and exclude margin symbols like BTCDOWNUSDT
+                if PAIR_WITH in coin['symbol'] and all(item not in coin['symbol'] for item in FIATS):
+                    possible_set.add(coin['symbol'])
+
+            return possible_set
 
 
-        def simplify(hash):
+        def round_decimals_down(number: float, decimals: int):
+            """
+            Returns a value rounded down to a specific number of decimal places.
+            """
+            if not isinstance(decimals, int):
+                raise TypeError("decimal places must be an integer")
+            elif decimals < 0:
+                raise ValueError("decimal places has to be 0 or more")
+            elif decimals == 0:
+                return math.floor(number)
+
+            factor = 10 ** decimals
+            return math.floor(number * factor) / factor
+
+        def sell_inv(coin, qnt):
+
+            try:
+                print(f"selling {coin}, {qnt}")
+                sell_market = client.create_order(symbol=coin, side='SELL', type='MARKET', quantity=qnt)
+            except Exception as e:
+                print(e)
+
+        def sell_all():
+            my_account = client.get_account()
+            lot_size = {}
+            volume = {}
+            for hashmap in my_account['balances']:
+                if float(hashmap['free']) > 0:
+                    coinName = hashmap['asset']
+                    tempName = coinName + 'USDT'
+                    if tempName in possible_set:
+                        try:
+                            info = client.get_symbol_info(tempName)
+                            step_size = info['filters'][2]['stepSize']
+                            lot_size[tempName] = step_size.index('1') - 1
+
+                            if lot_size[tempName] < 0:
+                                lot_size[tempName] = 0
+
+                        except:
+                            pass
+
+                        if tempName not in lot_size:
+                            print(">>>>", tempName)
+                            volume[tempName] = round_decimals_down(float(hashmap['free']), 1)
+                        else:
+                            volume[tempName] = round_decimals_down(float(hashmap['free']), lot_size[tempName])
+
+                        sell_inv(tempName, volume[tempName])
+
+        def update_portfolio_add(hash):
             # when bot bought coin, update the portfolio in simple format
             symbol = hash['symbol']
-            avg = hash['fills'][0]['price']
-            boughtTime = hash['transactTime']
 
-            portfolio = {}
-            portfolio['symbol'] = symbol
-            portfolio['avg'] = avg
-            portfolio['time'] = boughtTime
+            coin_bought = {}
+            coin_bought['avg'] = hash['fills'][0]['price']
+            coin_bought['time'] = hash['transactTime']
+            coin_bought['qnt'] = hash['origQty']
 
-            return portfolio
+            # update portfolio
+            portfolio[symbol] = coin_bought
 
+        def convertVolume(coin):
+            lot_size = {}
+            volume = {}
+            try:
+                info = client.get_symbol_info(coin)
+                step_size = info['filters'][2]['stepSize']
+                lot_size[coin] = step_size.index('1') - 1
+
+                if lot_size[coin] < 0:
+                    lot_size[coin] = 0
+
+            except:
+                pass
+
+            volume[coin] = float(QUANTITY / float(currentPirce(coin)))
+
+            if coin not in lot_size:
+                volume[coin] = float('{:.1f}'.format(volume[coin]))
+
+            else:
+                volume[coin] = float('{:.{}f}'.format(volume[coin], lot_size[coin]))
+
+            return volume[coin]
+
+        def currentPirce(coin):
+            coinInfo = client.get_symbol_ticker(symbol=coin)
+            return coinInfo['price']
 
         def buy(coin='ETHUSDT'):
             try:
                 print("buying coin")
-                buy_market = client.create_order(symbol='ETHUSDT', side='BUY', type='MARKET', quantity=0.5013)
-                return simplify(buy_market), 1
+                buy_market = client.create_order(symbol='ETHUSDT', side='BUY', type='MARKET', quantity=convertVolume(coin))
+                # update portfolio
+                update_portfolio_add(buy_market) # add new holding
             except Exception as e:
                 print(e)
-
 
         def sell(coin='ETHUSDT'):
             try:
+                print(coin)
                 print("selling coin")
-                sell_market = client.create_order(symbol='ETHUSDT', side='SELL', type='MARKET', quantity=0.5013)
-                return {}, 0
+                sell_market = client.create_order(symbol='ETHUSDT', side='SELL', type='MARKET', quantity=portfolio[coin]['qnt'])
+                del portfolio[coin]
+                print(coin, portfolio)
             except Exception as e:
                 print(e)
-
-
 
         def get_account_value():
             total_value = 0
@@ -87,12 +174,10 @@ class Solution:
 
             return total_value
 
-
-
         def sell_all():
             pass
 
-        def update_portfolio(date,value,filename='portfolio_history.json'):
+        def update_json_file(date,value,filename='portfolio_history.json'):
             with open('portfolio_history.json') as json_file:
                 data = json.load(json_file)
                 temp = data["history"]
@@ -102,55 +187,54 @@ class Solution:
             with open('portfolio_history.json', "w") as f:
                 json.dump(data, f, indent=4)
 
-        sell_all()
+        if firstTime:
+            sell_all()
+
         while True:
-            if holdings == 0:
+            if len(portfolio) == 0:
                 # buy coin
                 print("--------------------")
                 print("[BUY]")
                 coin = pick_coin()
-                print(f"Buying {coin}")
-                simple, holdings = buy(coin)
-                print(f"Now holding {holdings}")
-                print(simple)
+                buy(coin)
+                print(f"{coin} bought >>> portfolio: {portfolio}")
                 print("--------------------")
             else:
                 # check time, take profit, stop loss
                 print("--------------------")
 
-                time_passed = calendar.timegm(time.gmtime()) - simple['time']/1000
+                time_passed = calendar.timegm(time.gmtime()) - portfolio[coin]['time']/1000
 
                 if time_passed >= 60 * max_minutes:
-                    print("[TIME LIMIT PASSED]")
-                    print(time_passed)
-                    print(f"maximum minute {max_minutes} passed, selling coins")
-                    simple, holdings = sell(coin)
-                    update_portfolio(calendar.timegm(time.gmtime()),get_account_value())
+                    print(f"[TIME LIMIT PASSED]-{time_passed}")
+                    sell(coin)
+                    print(f"{coin} sold >>> portfolio: {portfolio}")
+                    update_json_file(calendar.timegm(time.gmtime()),get_account_value())
                     print("--------------------")
 
                 else:
-                    print("[TIME LIMIT NOT PASSED]")
-                    print(time_passed)
+                    print(f"[TIME LIMIT NOT PASSED]-{time_passed}")
                     coinInfo = client.get_symbol_ticker(symbol=coin)
                     currentPrice = coinInfo['price']
-                    boughtPrice = simple['avg']
+                    boughtPrice = portfolio[coin]['avg']
                     percentage = ((float(currentPrice) - float(boughtPrice)) / float(boughtPrice)) * 100
                     print(f"percentage is {percentage}")
 
-                    if percentage >= 2.0 or percentage <= -1.5:
+                    if percentage >= 1.5 or percentage <= -1.5:
+                        print("[SELL]")
                         if percentage > 0:
-                            print(f"selling with profits: {percentage}")
+                            print(f"profits: {percentage}")
                         else:
-                            print(f"selling with loss: {percentage}")
+                            print(f"loss: {percentage}")
 
-                        simple, holdings = sell(coin)
-                        update_portfolio(calendar.timegm(time.gmtime()), get_account_value())
+                        sell(coin)
+                        print(f"{coin} sold >>> portfolio: {portfolio}")
+                        update_json_file(calendar.timegm(time.gmtime()), get_account_value())
                     else:
-                        print("price didn't hit target")
+                        print("[DO NOTHING]")
                         pass
 
                     print("--------------------")
-
 
             time.sleep(5)
 
@@ -158,8 +242,7 @@ class Solution:
 
 
 
+bot = Solution()
+bot.tradeBot(testMode=True, qnt=13, holdings=1, firstTime=False)
 
-#
-# bot = Solution()
-# bot.tradeBot(True)
 
