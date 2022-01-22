@@ -1,18 +1,23 @@
+# create a list of coins that is higher than 45 minutes ago, then pick one of them randomly. Then trade the one
+
 import calendar
 from binance.client import Client
 import time
 import json
 import math
-
+import random
 
 
 class Solution:
-    def tradeBot(self, testMode, qnt, holdings, firstTime):
+    def tradeBot(self, testMode, USD, holdings, firstTime, max_min, take_proft, stop_loss):
         TESTNET = testMode
-        max_minutes = 1
-        QUANTITY = qnt
+        max_minutes = max_min
+        QUANTITY = USD
         portfolio = {}
         possible_set = {'MCOUSDT', 'TORNUSDT', 'GTCUSDT', 'BTGUSDT', 'USDTTRY', 'EGLDUSDT', 'MLNUSDT', 'EOSBEARUSDT', 'XRPBULLUSDT', 'QTUMUSDT', 'PEOPLEUSDT', 'RGTUSDT', 'DREPUSDT', 'BTTUSDT', 'BURGERUSDT', 'GALAUSDT', 'DOGEUSDT', 'CTXCUSDT', 'NUUSDT', 'AMPUSDT', 'STXUSDT', 'BATUSDT', 'DEGOUSDT', 'BZRXUSDT', 'RAYUSDT', 'NKNUSDT', 'DEXEUSDT', 'XZCUSDT', 'HIVEUSDT', 'ONGUSDT', 'AXSUSDT', 'KAVAUSDT', 'KEEPUSDT', 'WAXPUSDT', 'IMXUSDT', 'TOMOUSDT', 'KEYUSDT', 'HOTUSDT', 'LSKUSDT', 'BNBBEARUSDT', 'SOLUSDT', 'FARMUSDT', 'IDEXUSDT', 'CTSIUSDT', 'USDTBRL', 'SUNUSDT', 'AUDIOUSDT', 'COMPUSDT', 'TRUUSDT', 'ENJUSDT', 'SANTOSUSDT', 'BCHSVUSDT', 'ANTUSDT', 'BAKEUSDT', 'BTCUSDT', 'PONDUSDT', 'LINAUSDT', 'RLCUSDT', 'FUNUSDT', 'FORUSDT', 'MBOXUSDT', 'FETUSDT', 'ACMUSDT', 'SYSUSDT', 'USDPUSDT', 'BETAUSDT', 'XRPBEARUSDT', 'MKRUSDT', 'WINGUSDT', 'REEFUSDT', 'YFIIUSDT', 'STRAXUSDT', 'DATAUSDT', 'AVAUSDT', 'LUNAUSDT', 'AVAXUSDT', 'CLVUSDT', 'IOTAUSDT', 'DCRUSDT', 'CITYUSDT', 'INJUSDT', 'PSGUSDT', 'XMRUSDT', 'BEARUSDT', 'NULSUSDT', 'PERPUSDT', 'RIFUSDT', 'AGLDUSDT', 'BCHUSDT', 'PNTUSDT', 'ONEUSDT', 'FIROUSDT', 'BARUSDT', 'GHSTUSDT', 'HARDUSDT', 'FILUSDT', 'VIDTUSDT', 'LENDUSDT', 'AAVEUSDT', 'ALPACAUSDT', 'NANOUSDT', 'ARPAUSDT', 'CFXUSDT', 'NBSUSDT', 'HBARUSDT', 'CHRUSDT', 'VTHOUSDT', 'DIAUSDT', 'SKLUSDT', 'EOSUSDT', 'BADGERUSDT', 'FORTHUSDT', 'CELOUSDT', 'CHZUSDT', 'USDTBIDR', 'CVPUSDT', 'USDSUSDT', 'DAIUSDT', 'BTCSTUSDT', 'WANUSDT', 'OCEANUSDT', 'USDTBKRW', 'MDTUSDT', 'ENSUSDT', 'LRCUSDT', 'WRXUSDT', 'MINAUSDT', 'ZILUSDT', 'RUNEUSDT', 'GXSUSDT', 'LINKUSDT', 'ANKRUSDT', 'RSRUSDT', 'FTTUSDT', 'RNDRUSDT', 'BELUSDT', 'UMAUSDT', 'FIDAUSDT', 'RAMPUSDT', 'PYRUSDT', 'TVKUSDT', 'PAXUSDT', 'TROYUSDT', 'FIOUSDT', 'TRXUSDT', 'BALUSDT', 'XVGUSDT', '1INCHUSDT', 'POWRUSDT', 'THETAUSDT', 'USDTUAH', 'COTIUSDT', 'DGBUSDT', 'BTSUSDT', 'KMDUSDT', 'ETCUSDT', 'TRIBEUSDT', 'QIUSDT', 'ROSEUSDT', 'PUNDIXUSDT', 'OMGUSDT', 'ILVUSDT', 'STORMUSDT', 'HNTUSDT', 'GRTUSDT', 'USDTGYEN', 'AIONUSDT', 'JASMYUSDT', 'BANDUSDT', 'RADUSDT', 'PAXGUSDT', 'ERDUSDT', 'MANAUSDT', 'LTOUSDT', 'LTCUSDT', 'SPELLUSDT', 'XRPUSDT', 'NMRUSDT', 'STORJUSDT', 'ALGOUSDT', 'WAVESUSDT', 'ATAUSDT', 'CHESSUSDT', 'BCCUSDT', 'FRONTUSDT', 'RVNUSDT', 'OGNUSDT', 'BNTUSDT', 'KSMUSDT', 'FLMUSDT', 'ANYUSDT', 'POLYUSDT', 'DNTUSDT', 'ALCXUSDT', 'ONTUSDT', 'BEAMUSDT', 'USDTBVND', 'MITHUSDT', 'DOTUSDT', 'GNOUSDT', 'ORNUSDT', 'TFUELUSDT', 'ELFUSDT', 'SUSHIUSDT', 'CVXUSDT', 'LAZIOUSDT', 'REQUSDT', 'MASKUSDT', 'HIGHUSDT', 'JSTUSDT', 'JOEUSDT', 'ICXUSDT', 'USDTRUB', 'ADXUSDT', 'USDTNGN', 'BNXUSDT', 'MDXUSDT', 'PORTOUSDT', 'XLMUSDT', 'FLUXUSDT', 'XVSUSDT', 'ARDRUSDT', 'AUDUSDT', 'YFIUSDT', 'HCUSDT', 'TCTUSDT', 'MTLUSDT', 'USDCUSDT', 'USDTIDRT', 'CELRUSDT', 'IRISUSDT', 'VETUSDT', 'ADAUSDT', 'AKROUSDT', 'MBLUSDT', 'STPTUSDT', 'BUSDTRY', 'USDSBUSDT', 'OXTUSDT', 'SNXUSDT', 'KLAYUSDT', 'USDTZAR', 'ATOMUSDT', 'QUICKUSDT', 'SHIBUSDT', 'ETHUSDT', 'PERLUSDT', 'CAKEUSDT', 'TLMUSDT', 'VOXELUSDT', 'USDTDAI', 'DARUSDT', 'NEARUSDT', 'USTUSDT', 'AUTOUSDT', 'JUVUSDT', 'FXSUSDT', 'GTOUSDT', 'RENUSDT', 'XEMUSDT', 'BLZUSDT', 'COCOSUSDT', 'DOCKUSDT', 'ZENUSDT', 'ACHUSDT', 'ASRUSDT', 'FISUSDT', 'ICPUSDT', 'GLMRUSDT', 'WINUSDT', 'OOKIUSDT', 'CRVUSDT', 'BCHABCUSDT', 'KNCUSDT', 'MCUSDT', 'PHAUSDT', 'BONDUSDT', 'DYDXUSDT', 'MATICUSDT', 'WTCUSDT', 'DASHUSDT', 'NEOUSDT', 'DENTUSDT', 'UNIUSDT', 'FLOWUSDT', 'RAREUSDT', 'ZRXUSDT', 'DUSKUSDT', 'YGGUSDT', 'SFPUSDT', 'TKOUSDT', 'VENUSDT', 'IOTXUSDT', 'BNBUSDT', 'ERNUSDT', 'KP3RUSDT', 'ZECUSDT', 'COSUSDT', 'ALICEUSDT', 'ETHBULLUSDT', 'MIRUSDT', 'EOSBULLUSDT', 'REPUSDT', 'STRATUSDT', 'FTMUSDT', 'BULLUSDT', 'BNBBULLUSDT', 'ETHBEARUSDT', 'C98USDT', 'SCUSDT', 'SANDUSDT', 'UTKUSDT', 'LPTUSDT', 'POLSUSDT', 'CKBUSDT', 'TWTUSDT', 'VGXUSDT', 'VITEUSDT', 'OGUSDT', 'PLAUSDT', 'WNXMUSDT', 'UNFIUSDT', 'CTKUSDT', 'BICOUSDT', 'TRBUSDT', 'MOVRUSDT', 'SLPUSDT', 'AUCTIONUSDT', 'SXPUSDT', 'ALPHAUSDT', 'ARUSDT', 'NPXSUSDT', 'MFTUSDT', 'CVCUSDT', 'SRMUSDT', 'XECUSDT', 'XTZUSDT', 'ATMUSDT', 'DODOUSDT', 'IOSTUSDT', 'OMUSDT', 'EPSUSDT', 'DFUSDT', 'QNTUSDT', 'STMXUSDT', 'LITUSDT', 'BKRWUSDT'}
+
+        coin_list = []
+
 
         if TESTNET:
             api_key = 'nYH4oc6HQl0P8gCUb7PpW8WHsGc5pmfYbcHyjr3y2oDd9y0690w0vKayZjoIRZw4'
@@ -25,10 +30,6 @@ class Solution:
             client = Client(api_key, api_secret)
 
 
-        # pick coin to buy
-        def pick_coin():
-            print("...ETHUSDT picked...")
-            return 'ETHUSDT'
 
         def get_possible():
             FIATS = ['EURUSDT', 'GBPUSDT', 'JPYUSDT', 'USDUSDT', 'DOWN', 'UP']
@@ -194,6 +195,55 @@ class Solution:
             with open('portfolio_history.json', "w") as f:
                 json.dump(data, f, indent=4)
 
+        def create_first_list():
+            # get symbols - base aseet in USDT and currently Trading
+            print("Creating first coin list ... ")
+            coin_list = []
+            info = client.get_exchange_info()
+            FIATS = ['EURUSDT', 'GBPUSDT', 'JPYUSDT', 'USDUSDT', 'DOWN', 'UP']
+            for coin in info['symbols']:
+                if coin['symbol'].endswith('USDT') and all(item not in coin['symbol'] for item in FIATS):
+                    if coin['status'] == 'TRADING':
+                        coin_list.append(coin['symbol'])
+
+            return coin_list
+
+        def get_change(symbol):
+            price = client.get_historical_klines(symbol, Client.KLINE_INTERVAL_1MINUTE, "45 minutes ago")
+            first = float(price[0][2])
+            second = float(price[43][2])
+            change = (second - first) / first
+            formatted = format(change, ".2f")
+            return float(formatted)
+
+        def create_second_list(coin_list):
+            # among the coin_list, pick coins that is higher than 45 minutes ago
+            coin_list_middle = []
+            for coin in coin_list:
+                percentage = get_change(coin)
+
+                if percentage > 0:
+                    coin_list_middle.append(coin)
+
+            return coin_list_middle
+
+        coin_list = create_first_list()
+
+
+        def pick_coin():
+            # pick randome one from coin_list2
+            print(f"coin list is {coin_list}")
+            coin_list2 = create_second_list(coin_list)
+            print(f"coin list2 is {coin_list2}")
+            if len(coin_list2) == 0:
+                return None
+            else:
+                picked_coin = random.choice(coin_list2)
+                print(f"{picked_coin} is selected")
+                return picked_coin
+
+
+
         if firstTime:
             sell_all()
 
@@ -203,7 +253,10 @@ class Solution:
                 print("--------------------")
                 print("[BUY]")
                 coin = pick_coin()
+                if coin is None:
+                    continue
                 buy(coin)
+                update_json_file(calendar.timegm(time.gmtime()), get_account_value())
                 print(f"{coin} bought >>> portfolio: {portfolio}")
                 print("--------------------")
             else:
@@ -227,7 +280,7 @@ class Solution:
                     percentage = ((float(currentPrice) - float(boughtPrice)) / float(boughtPrice)) * 100
                     print(f"percentage is {percentage}")
 
-                    if percentage >= 1.5 or percentage <= -1.5:
+                    if percentage >= take_proft or percentage <= stop_loss:
                         print("[SELL]")
                         if percentage > 0:
                             print(f"profits: {percentage}")
@@ -248,143 +301,9 @@ class Solution:
 
 
 
-#
-# bot = Solution()
-# bot.tradeBot(testMode=True, qnt=13, holdings=1, firstTime=False)
-#
-#
-api_key = 'f1KzRyDIciGXKW88Z8UvZ55CeefAG5svrMFdUlnjMSHK49MaQAgm343Q1IZvQqgl'
-api_secret = 'fwUAvrW3fbgMX6jlec94W0EcWFWBzrNAWK60QtYAeO7xbGq35vEU0T8bBtW9W5qj'
-client = Client(api_key, api_secret)
-# my_account = client.get_account()
-# possible_set = {'MCOUSDT', 'TORNUSDT', 'GTCUSDT', 'BTGUSDT', 'USDTTRY', 'EGLDUSDT', 'MLNUSDT', 'EOSBEARUSDT',
-#                 'XRPBULLUSDT', 'QTUMUSDT', 'PEOPLEUSDT', 'RGTUSDT', 'DREPUSDT', 'BTTUSDT', 'BURGERUSDT', 'GALAUSDT',
-#                 'DOGEUSDT', 'CTXCUSDT', 'NUUSDT', 'AMPUSDT', 'STXUSDT', 'BATUSDT', 'DEGOUSDT', 'BZRXUSDT', 'RAYUSDT',
-#                 'NKNUSDT', 'DEXEUSDT', 'XZCUSDT', 'HIVEUSDT', 'ONGUSDT', 'AXSUSDT', 'KAVAUSDT', 'KEEPUSDT', 'WAXPUSDT',
-#                 'IMXUSDT', 'TOMOUSDT', 'KEYUSDT', 'HOTUSDT', 'LSKUSDT', 'BNBBEARUSDT', 'SOLUSDT', 'FARMUSDT',
-#                 'IDEXUSDT', 'CTSIUSDT', 'USDTBRL', 'SUNUSDT', 'AUDIOUSDT', 'COMPUSDT', 'TRUUSDT', 'ENJUSDT',
-#                 'SANTOSUSDT', 'BCHSVUSDT', 'ANTUSDT', 'BAKEUSDT', 'BTCUSDT', 'PONDUSDT', 'LINAUSDT', 'RLCUSDT',
-#                 'FUNUSDT', 'FORUSDT', 'MBOXUSDT', 'FETUSDT', 'ACMUSDT', 'SYSUSDT', 'USDPUSDT', 'BETAUSDT',
-#                 'XRPBEARUSDT', 'MKRUSDT', 'WINGUSDT', 'REEFUSDT', 'YFIIUSDT', 'STRAXUSDT', 'DATAUSDT', 'AVAUSDT',
-#                 'LUNAUSDT', 'AVAXUSDT', 'CLVUSDT', 'IOTAUSDT', 'DCRUSDT', 'CITYUSDT', 'INJUSDT', 'PSGUSDT', 'XMRUSDT',
-#                 'BEARUSDT', 'NULSUSDT', 'PERPUSDT', 'RIFUSDT', 'AGLDUSDT', 'BCHUSDT', 'PNTUSDT', 'ONEUSDT', 'FIROUSDT',
-#                 'BARUSDT', 'GHSTUSDT', 'HARDUSDT', 'FILUSDT', 'VIDTUSDT', 'LENDUSDT', 'AAVEUSDT', 'ALPACAUSDT',
-#                 'NANOUSDT', 'ARPAUSDT', 'CFXUSDT', 'NBSUSDT', 'HBARUSDT', 'CHRUSDT', 'VTHOUSDT', 'DIAUSDT', 'SKLUSDT',
-#                 'EOSUSDT', 'BADGERUSDT', 'FORTHUSDT', 'CELOUSDT', 'CHZUSDT', 'USDTBIDR', 'CVPUSDT', 'USDSUSDT',
-#                 'DAIUSDT', 'BTCSTUSDT', 'WANUSDT', 'OCEANUSDT', 'USDTBKRW', 'MDTUSDT', 'ENSUSDT', 'LRCUSDT', 'WRXUSDT',
-#                 'MINAUSDT', 'ZILUSDT', 'RUNEUSDT', 'GXSUSDT', 'LINKUSDT', 'ANKRUSDT', 'RSRUSDT', 'FTTUSDT', 'RNDRUSDT',
-#                 'BELUSDT', 'UMAUSDT', 'FIDAUSDT', 'RAMPUSDT', 'PYRUSDT', 'TVKUSDT', 'PAXUSDT', 'TROYUSDT', 'FIOUSDT',
-#                 'TRXUSDT', 'BALUSDT', 'XVGUSDT', '1INCHUSDT', 'POWRUSDT', 'THETAUSDT', 'USDTUAH', 'COTIUSDT', 'DGBUSDT',
-#                 'BTSUSDT', 'KMDUSDT', 'ETCUSDT', 'TRIBEUSDT', 'QIUSDT', 'ROSEUSDT', 'PUNDIXUSDT', 'OMGUSDT', 'ILVUSDT',
-#                 'STORMUSDT', 'HNTUSDT', 'GRTUSDT', 'USDTGYEN', 'AIONUSDT', 'JASMYUSDT', 'BANDUSDT', 'RADUSDT',
-#                 'PAXGUSDT', 'ERDUSDT', 'MANAUSDT', 'LTOUSDT', 'LTCUSDT', 'SPELLUSDT', 'XRPUSDT', 'NMRUSDT', 'STORJUSDT',
-#                 'ALGOUSDT', 'WAVESUSDT', 'ATAUSDT', 'CHESSUSDT', 'BCCUSDT', 'FRONTUSDT', 'RVNUSDT', 'OGNUSDT',
-#                 'BNTUSDT', 'KSMUSDT', 'FLMUSDT', 'ANYUSDT', 'POLYUSDT', 'DNTUSDT', 'ALCXUSDT', 'ONTUSDT', 'BEAMUSDT',
-#                 'USDTBVND', 'MITHUSDT', 'DOTUSDT', 'GNOUSDT', 'ORNUSDT', 'TFUELUSDT', 'ELFUSDT', 'SUSHIUSDT', 'CVXUSDT',
-#                 'LAZIOUSDT', 'REQUSDT', 'MASKUSDT', 'HIGHUSDT', 'JSTUSDT', 'JOEUSDT', 'ICXUSDT', 'USDTRUB', 'ADXUSDT',
-#                 'USDTNGN', 'BNXUSDT', 'MDXUSDT', 'PORTOUSDT', 'XLMUSDT', 'FLUXUSDT', 'XVSUSDT', 'ARDRUSDT', 'AUDUSDT',
-#                 'YFIUSDT', 'HCUSDT', 'TCTUSDT', 'MTLUSDT', 'USDCUSDT', 'USDTIDRT', 'CELRUSDT', 'IRISUSDT', 'VETUSDT',
-#                 'ADAUSDT', 'AKROUSDT', 'MBLUSDT', 'STPTUSDT', 'BUSDTRY', 'USDSBUSDT', 'OXTUSDT', 'SNXUSDT', 'KLAYUSDT',
-#                 'USDTZAR', 'ATOMUSDT', 'QUICKUSDT', 'SHIBUSDT', 'ETHUSDT', 'PERLUSDT', 'CAKEUSDT', 'TLMUSDT',
-#                 'VOXELUSDT', 'USDTDAI', 'DARUSDT', 'NEARUSDT', 'USTUSDT', 'AUTOUSDT', 'JUVUSDT', 'FXSUSDT', 'GTOUSDT',
-#                 'RENUSDT', 'XEMUSDT', 'BLZUSDT', 'COCOSUSDT', 'DOCKUSDT', 'ZENUSDT', 'ACHUSDT', 'ASRUSDT', 'FISUSDT',
-#                 'ICPUSDT', 'GLMRUSDT', 'WINUSDT', 'OOKIUSDT', 'CRVUSDT', 'BCHABCUSDT', 'KNCUSDT', 'MCUSDT', 'PHAUSDT',
-#                 'BONDUSDT', 'DYDXUSDT', 'MATICUSDT', 'WTCUSDT', 'DASHUSDT', 'NEOUSDT', 'DENTUSDT', 'UNIUSDT',
-#                 'FLOWUSDT', 'RAREUSDT', 'ZRXUSDT', 'DUSKUSDT', 'YGGUSDT', 'SFPUSDT', 'TKOUSDT', 'VENUSDT', 'IOTXUSDT',
-#                 'BNBUSDT', 'ERNUSDT', 'KP3RUSDT', 'ZECUSDT', 'COSUSDT', 'ALICEUSDT', 'ETHBULLUSDT', 'MIRUSDT',
-#                 'EOSBULLUSDT', 'REPUSDT', 'STRATUSDT', 'FTMUSDT', 'BULLUSDT', 'BNBBULLUSDT', 'ETHBEARUSDT', 'C98USDT',
-#                 'SCUSDT', 'SANDUSDT', 'UTKUSDT', 'LPTUSDT', 'POLSUSDT', 'CKBUSDT', 'TWTUSDT', 'VGXUSDT', 'VITEUSDT',
-#                 'OGUSDT', 'PLAUSDT', 'WNXMUSDT', 'UNFIUSDT', 'CTKUSDT', 'BICOUSDT', 'TRBUSDT', 'MOVRUSDT', 'SLPUSDT',
-#                 'AUCTIONUSDT', 'SXPUSDT', 'ALPHAUSDT', 'ARUSDT', 'NPXSUSDT', 'MFTUSDT', 'CVCUSDT', 'SRMUSDT', 'XECUSDT',
-#                 'XTZUSDT', 'ATMUSDT', 'DODOUSDT', 'IOSTUSDT', 'OMUSDT', 'EPSUSDT', 'DFUSDT', 'QNTUSDT', 'STMXUSDT',
-#                 'LITUSDT', 'BKRWUSDT'}
-# lot_size = {}
-# volume = {}
-# for hashmap in my_account['balances']:
-#     coinName = hashmap['asset']
-#     coin = coinName + 'USDT'
-#     try:
-#         info = client.get_symbol_info(coin)
-#         step_size = info['filters'][2]['stepSize']
-#         lot_size[coin] = step_size.index('1') - 1
-#
-#         if lot_size[coin] < 0:
-#             lot_size[coin] = 0
-#
-#     except:
-#         pass
-#
-#
-#
-#     if coin not in lot_size:
-#         print(coin)
-#
-#     else:
-#         print("--")
-#
-#     time.sleep(2)
 
-
-
-
-def get_24h_volume(symbol):
-    # get trading volumes for the last 24 hours
-    trading_volume = 0
-    prices = client.get_all_tickers()
-    for coin in prices:
-        if coin['symbol'].endswith(symbol):
-            try:
-                klines = client.get_historical_klines(coin['symbol'],
-                                                        Client.KLINE_INTERVAL_1MINUTE,
-                                                        "1 day ago")
-                for history in klines:
-                    trading_volume += float(history[7])
-
-            except:
-                pass
-
-
-
-    return trading_volume
-
-
-
-# result = get_24h_volume('ETH')
-# print("{:,}".format(result))
-# trade = 0
-# klines = client.get_historical_klines('ETHUSDT',
-#                                         Client.KLINE_INTERVAL_1MINUTE,
-#                                         "1 day ago")
-#
-#
-#
-# volume = 0
-#
-# for history in klines:
-#     volume+=float(history[5])
-#
-# print('{:,.2f}'.format(float(volume)))
-
-
-volume = 0
-
-
-
-prices = client.get_all_tickers()
-for coin in prices:
-    if coin['symbol'].endswith('DOGE'):
-        try:
-            print(coin['symbol'])
-            klines = client.get_historical_klines(coin['symbol'],
-                                                  Client.KLINE_INTERVAL_1MINUTE,
-                                                  "1 day ago")
-            for history in klines:
-                volume += float(history[7])
-
-        except:
-            pass
-
-print('{:,.2f}'.format(float(volume)))
+bot = Solution()
+bot.tradeBot(testMode=False, USD=11, holdings=1, firstTime=False, max_min=5, take_proft=1, stop_loss=-1)
 
 
 
