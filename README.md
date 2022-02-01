@@ -8,6 +8,15 @@
 3. Buy the coin
 4. take profit: 1%, stop loss: -1%, maximum hold: 30 seconds
 
+**version 0.5**
+
+What's new?
+- simplified code
+- now can buy and hold multiple coins at the same time
+- maintenance improved
+
+
+
 
 
 
