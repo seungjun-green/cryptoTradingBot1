@@ -1,5 +1,3 @@
-# create a list of coins that is higher than 45 minutes ago, then pick one of them randomly. Then trade the one
-
 import calendar
 from binance.client import Client
 import time
@@ -20,16 +18,14 @@ class Solution:
 
 
         if TESTNET:
-            api_key = 'nYH4oc6HQl0P8gCUb7PpW8WHsGc5pmfYbcHyjr3y2oDd9y0690w0vKayZjoIRZw4'
-            api_secret = 'r29O1aWoAn48V17SfeePE9jTK6YywXReSiqdqTY8BXWB470yRSiPm5wUMh9gc41v'
+            api_key = YOUR_API_KEY
+            api_secret = YOUR_API_SECRET
             client = Client(api_key, api_secret)
             client.API_URL = 'https://testnet.binance.vision/api'
         else:
-            api_key = 'f1KzRyDIciGXKW88Z8UvZ55CeefAG5svrMFdUlnjMSHK49MaQAgm343Q1IZvQqgl'
-            api_secret = 'fwUAvrW3fbgMX6jlec94W0EcWFWBzrNAWK60QtYAeO7xbGq35vEU0T8bBtW9W5qj'
+            api_key = YOUR_API_KEY
+            api_secret = YOUR_API_SECRET
             client = Client(api_key, api_secret)
-
-
 
         def get_possible():
             FIATS = ['EURUSDT', 'GBPUSDT', 'JPYUSDT', 'USDUSDT', 'DOWN', 'UP']
@@ -101,18 +97,12 @@ class Solution:
         def update_portfolio_add(hash):
             # when bot bought coin, update the portfolio in simple format
             symbol = hash['symbol']
-
             coin_bought = {}
             coin_bought['avg'] = hash['fills'][0]['price']
             coin_bought['time'] = hash['transactTime']
-            coin_bought['qnt'] = hash['origQty']
-
-            # update portfolio
+            coin_bought['qnt'] = hash['executedQty']
             portfolio[symbol] = coin_bought
 
-        # convert volume
-        # ex.) 10USDT -> 0.0063 ETH
-        # We round up when formatting qnt to fit the lot size
         def convertVolume(coin):
             lot_size = {}
             volume = {}
@@ -125,7 +115,7 @@ class Solution:
                     lot_size[coin] = 0
 
             except:
-                pass
+                lot_size[coin] = 1
 
             volume[coin] = float(QUANTITY / float(currentPirce(coin)))
 
@@ -135,7 +125,7 @@ class Solution:
             else:
                 volume[coin] = float('{:.{}f}'.format(volume[coin], lot_size[coin]))
 
-            return volume[coin]
+            return volume[coin], lot_size[coin]
 
         # func to get current price of certain coin
         def currentPirce(coin):
@@ -145,23 +135,39 @@ class Solution:
         # func to buy coins
         def buy(coin):
             try:
-                print("buying coin")
-                buy_market = client.create_order(symbol='ETHUSDT', side='BUY', type='MARKET', quantity=convertVolume(coin))
+                qnt, lotsize = convertVolume(coin)
+                print(f"buying coin {qnt}")
+                buy_market = client.create_order(symbol=coin, side='BUY', type='MARKET', quantity=qnt)
                 # update portfolio
                 update_portfolio_add(buy_market) # add new holding
             except Exception as e:
                 print(e)
 
+        def count_after_dot(s):
+            for i in range(len(s)):
+                if s[i] == '.':
+                    return len(s[i + 1:])
+
+                return 0
+
+
         # func to sell coins
         def sell(coin):
             try:
                 print(coin)
-                print("selling coin")
-                sell_market = client.create_order(symbol='ETHUSDT', side='SELL', type='MARKET', quantity=portfolio[coin]['qnt'])
+                print("selling coin", portfolio[coin]['qnt'])
+                s = portfolio[coin]['qnt']
+                sell_market = client.create_order(symbol=coin, side='SELL', type='MARKET', quantity=s)
                 del portfolio[coin]
                 print(coin, portfolio)
             except Exception as e:
-                print(e)
+                print("try selling again ....... ")
+                s = portfolio[coin]['qnt']
+                d = (float(s) * pow(10, count_after_dot(s)) - 1) / pow(10, count_after_dot(s))
+                sell_market = client.create_order(symbol=coin, side='SELL', type='MARKET',quantity=d)
+                print("귀여웠던 혁준이")
+                del portfolio[coin]
+                print(coin, portfolio)
 
         # get account value in USDT
         def get_account_value():
@@ -212,7 +218,7 @@ class Solution:
             price = client.get_historical_klines(symbol, Client.KLINE_INTERVAL_1MINUTE, "45 minutes ago")
             first = float(price[0][2])
             second = float(price[43][2])
-            change = (second - first) / first
+            change = ((second - first) / first)*100
             formatted = format(change, ".2f")
             return float(formatted)
 
@@ -302,8 +308,5 @@ class Solution:
 
 
 
-bot = Solution()
-bot.tradeBot(testMode=False, USD=11, holdings=1, firstTime=False, max_min=5, take_proft=1, stop_loss=-1)
-
-
-
+# bot = Solution()
+# bot.tradeBot(testMode=False, USD=11, holdings=1, firstTime=False, max_min=0.5, take_proft=0.1, stop_loss=-1)
