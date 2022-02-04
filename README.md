@@ -10,10 +10,21 @@
 
 **version 0.5**
 
+1. Pick coins that current price is higher than 5 minutes ago
+2. Pick the coin with the most trading volume
+3. Buy the coin
+4. Take Proft: 0.1%, stop loss: -1%, maximum hold: 5 minutes
+
+
+**version 0.6**
+
+
 What's new?
-- simplified code
-- now can buy and hold multiple coins at the same time
-- maintenance improved
+
+-maintenance improved
+- when updating json file add this info to: info when buying(percentage, last 5 minutes trading volume ranking), result(loss or profit)
+- if possible consider using google sheets instead of json files
+
 
 
 
